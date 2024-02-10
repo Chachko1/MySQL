@@ -1,0 +1,99 @@
+CREATE DATABASE preserves_db;
+USE preserves_db;
+
+
+CREATE TABLE continents(
+id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(40) NOT NULL UNIQUE
+);
+
+CREATE TABLE countries(
+id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(40) NOT NULL UNIQUE,
+country_code VARCHAR(10) NOT NULL UNIQUE,
+continent_id INT NOT NULL,
+CONSTRAINT fk_countries_continents
+FOREIGN KEY(continent_id) REFERENCES continents(id)
+);
+
+CREATE TABLE preserves(
+id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(255) NOT NULL UNIQUE,
+latitude DECIMAL(9,6),
+longitude DECIMAL(9,6),
+area INT,
+type VARCHAR(20),
+established_on DATE 
+);
+
+
+
+CREATE TABLE positions(
+id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(40) NOT NULL UNIQUE,
+description TEXT,
+is_dangerous BOOLEAN NOT NULL
+
+
+);
+
+
+CREATE TABLE workers(
+id INT PRIMARY KEY AUTO_INCREMENT,
+first_name VARCHAR(40) NOT NULL,
+last_name VARCHAR(40) NOT NULL,
+age INT,
+personal_number VARCHAR (20) NOT NULL UNIQUE,
+salary DECIMAL(19,2),
+is_armed BOOLEAN NOT NULL,
+start_date DATE,
+preserve_id INT,
+position_id INT,
+CONSTRAINT fk_workers_preserves FOREIGN KEY (preserve_id) REFERENCES preserves(id),
+CONSTRAINT fk_workers_positions FOREIGN KEY (position_id) REFERENCES positions(id)
+);
+
+CREATE TABLE countries_preserves(
+country_id INT,
+preserve_id INT,
+CONSTRAINT fk_countries_preserves_countries FOREIGN KEY (country_id) REFERENCES countries(id),
+CONSTRAINT fk_countries_preserves_preserves FOREIGN KEY (preserve_id) REFERENCES preserves(id)
+
+
+);
+
+
+
+
+-- 2   
+
+INSERT INTO preserves(name,latitude,longitude,area,type,established_on)
+SELECT CONCAT(p.name,' ','is in South Hemisphere'),
+p.latitude,
+p.longitude,
+p.area*p.id,
+LOWER(p.type),
+p.established_on
+FROM preserves AS p
+WHERE latitude<0;
+
+
+
+UPDATE workers 
+SET salary=salary+500
+WHERE position_id IN(5,8,11,13);
+
+DELETE FROM preserves
+WHERE established_on IS NULL;
+
+
+SELECT * FROM workers;
+
+
+SELECT CONCAT(first_name,' ',last_name) AS 'full_name',
+DATEDIFF('2024-01-01',start_date) AS 'days_of_experience'
+FROM workers
+HAVING days_of_experience >5 *365
+ORDER BY days_of_experience DESC
+LIMIT 10;
+
